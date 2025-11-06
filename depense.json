@@ -1,0 +1,12 @@
+{
+    "argent": 2000,
+    "historique": [
+        {
+            "id": 1,
+            "actiontype": 1,
+            "description": "qsdf",
+            "value": 2000,
+            "date": "time.Date(2025, time.November, 6, 17, 30, 29, 130900519, time.Local)"
+        }
+    ]
+}
