@@ -13,7 +13,7 @@ import (
 	colortext "github.com/maminirinaedwino/depenseTrackerJson/ColorText"
 )
 
-const Filename = "depense.json"
+const Filename = "depense.foza"
 
 // const osFlag = os.O_CREATE | os.O_RDONLY | os.O_TRUNC
 
@@ -42,7 +42,10 @@ func GenerateSaveFile() {
 	jsonData, err := json.MarshalIndent(save, "", "    ")
 	ErrorChecker(err)
 	// file, err := os.OpenFile(Filename, os.O_CREATE | os.O_RDONLY | os.O_TRUNC, os.ModePerm)
-	file, err := os.Create(Filename)
+	homeDir, err := os.UserHomeDir()
+	ErrorChecker(err)
+	fmt.Println(homeDir)
+	file, err := os.Create(homeDir+"/"+Filename)
 	ErrorChecker(err)
 	file.WriteString(string(jsonData))
 }
@@ -50,14 +53,20 @@ func GenerateSaveFile() {
 func (save *Save) WriteFile() {
 	jsonData, err := json.MarshalIndent(save, "", "    ")
 	ErrorChecker(err)
-	file, err := os.OpenFile(Filename, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	homeDir, err := os.UserHomeDir()
+	ErrorChecker(err)
+	
+	file, err := os.OpenFile(homeDir+"/"+Filename, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	// file, err := os.Open(Filename)
 	ErrorChecker(err)
 	file.Write(jsonData)
 	fmt.Println("File Saved")
 }
 func (save *Save) ReadFile() {
-	file, err := os.ReadFile(Filename)
+	homeDir, err := os.UserHomeDir()
+	ErrorChecker(err)
+	fmt.Println("home ",homeDir)
+	file, err := os.ReadFile(homeDir+"/"+Filename)
 	ErrorChecker(err)
 
 	err = json.Unmarshal(file, &save)
@@ -165,7 +174,10 @@ func (save *Save) ListAllAction(actiontype int) {
 func main() {
 	fmt.Println(colortext.GreenString("Depense Tracker"))
 	var save Save
-	if _, err := os.Stat(Filename); err != nil {
+	homeDir, err := os.UserHomeDir()
+	ErrorChecker(err)
+
+	if _, err := os.Stat(homeDir+"/"+Filename); err != nil {
 		GenerateSaveFile()
 	}
 	addAction := flag.Bool("add", false, "Add a depense or money")
@@ -203,7 +215,10 @@ func main() {
 		delete an action
 --list 
 		list all action
-
+--list-add
+		list all add action
+--list-depense
+		list all depense action
 		`)
 	}
 }
