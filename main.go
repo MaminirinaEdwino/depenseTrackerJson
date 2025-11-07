@@ -1,15 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
+	"text/tabwriter"
 	"time"
+
+	colortext "github.com/maminirinaedwino/depenseTrackerJson/ColorText"
 )
 
 const Filename = "depense.json"
-const osFlag = os.O_CREATE | os.O_RDONLY | os.O_TRUNC
+
+// const osFlag = os.O_CREATE | os.O_RDONLY | os.O_TRUNC
 
 type Action struct {
 	Id          int     `json:"id"`
@@ -39,7 +45,6 @@ func GenerateSaveFile() {
 	file, err := os.Create(Filename)
 	ErrorChecker(err)
 	file.WriteString(string(jsonData))
-	fmt.Println("File Generated")
 }
 
 func (save *Save) WriteFile() {
@@ -49,7 +54,6 @@ func (save *Save) WriteFile() {
 	// file, err := os.Open(Filename)
 	ErrorChecker(err)
 	file.Write(jsonData)
-	fmt.Println(save)
 	fmt.Println("File Saved")
 }
 func (save *Save) ReadFile() {
@@ -68,14 +72,25 @@ func (action *Action) GetActionType() {
 	}
 }
 func (action *Action) GetDescription() {
-	fmt.Println("Enter the Description : ")
-	fmt.Scanln(&action.Description)
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Description : ")
+	if scanner.Scan() {
+		action.Description = scanner.Text()
+		if action.Description == "" {
+			action.GetDescription()
+		}
+	}
 }
-func (action *Action) GetValue() {
+func (action *Action) GetValue(argent float32) {
 	fmt.Print("Enter the value : ")
 	fmt.Scan(&action.Value)
 	if action.Value <= 0 {
-		action.GetValue()
+		action.GetValue(argent)
+	}
+	if action.ActionType == 2 {
+		if action.Value > argent {
+			action.GetValue(argent)
+		}
 	}
 }
 
@@ -84,12 +99,12 @@ func (save *Save) Addaction() {
 	if len(save.Historique) == 0 {
 		action.Id = 1
 	} else {
-		action.Id = save.Historique[len(save.Historique) -1].Id +1
+		action.Id = save.Historique[len(save.Historique)-1].Id + 1
 	}
 	action.GetActionType()
 	action.GetDescription()
-	action.GetValue()
-	action.Date = time.Now().GoString()
+	action.GetValue(float32(save.Argent))
+	action.Date = time.Now().Format("02-01-2006 03:04:05")
 	save.Historique = append(save.Historique, action)
 	if action.ActionType == 1 {
 		save.Argent += int(action.Value)
@@ -120,31 +135,66 @@ func (save *Save) DeleteAction() {
 		}
 	}
 }
+func (action *Action) ReturnActionType() string {
+	if action.ActionType == 1 {
+		return colortext.GreenString("add")
+	}
+	return colortext.RedText("dépense")
+}
+func (action *Action) ShowAction(w *tabwriter.Writer) {
+	fmt.Fprintf(w, "%d\t%s\t%s\t%.2f\t\t%s\n", action.Id, action.ReturnActionType(), action.Description, action.Value, action.Date)
+}
+
+func (save *Save) ListAllAction(actiontype int) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
+	fmt.Fprintln(w, "ID\tAction\tDescription\tValue\t\tDate\t")
+
+	for _, action := range save.Historique {
+		if actiontype > 0 {
+			if actiontype == action.ActionType {
+				action.ShowAction(w)
+			}
+		}else{
+			action.ShowAction(w)
+		}
+	}
+	w.Flush()
+	fmt.Println(colortext.GreenString("Argent : " + strconv.Itoa(save.Argent)))
+}
 
 func main() {
-	fmt.Println("Depense Tracker")
-	
+	fmt.Println(colortext.GreenString("Depense Tracker"))
+	var save Save
 	if _, err := os.Stat(Filename); err != nil {
 		GenerateSaveFile()
 	}
 	addAction := flag.Bool("add", false, "Add a depense or money")
 	deleteaction := flag.Bool("delete", false, "Delete an action")
-
+	listAllAction := flag.Bool("list", false, "List all action")
+	listAllAddAction := flag.Bool("list-add", false, "List all add action")
+	lsitAllDepenseAction := flag.Bool("list-depense", false, "List all depense action")
 	flag.Parse()
 
 	switch {
 	case *addAction:
-
-		var save Save
 		save.ReadFile()
 		save.Addaction()
 		save.WriteFile()
+		save.ListAllAction(0)
 	case *deleteaction:
-
-		var save Save
 		save.ReadFile()
 		save.DeleteAction()
 		save.WriteFile()
+		save.ListAllAction(0)
+	case *listAllAction:
+		save.ReadFile()
+		save.ListAllAction(0)
+	case *listAllAddAction:
+		save.ReadFile()
+		save.ListAllAction(1)
+	case *lsitAllDepenseAction:
+		save.ReadFile()
+		save.ListAllAction(2)
 	default:
 		fmt.Println(`
 --add

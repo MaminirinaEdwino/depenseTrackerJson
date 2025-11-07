@@ -1,12 +1,40 @@
 {
-    "argent": 2000,
+    "argent": 3926,
     "historique": [
         {
-            "id": 1,
+            "id": 4,
+            "actiontype": 1,
+            "description": "qlmsdkjf qmsdlfkjqmsf qmsdlfkjqsmdfklj",
+            "value": 2000,
+            "date": "7311-07-07 11:05:18"
+        },
+        {
+            "id": 5,
+            "actiontype": 1,
+            "description": "qsdfq",
+            "value": 11,
+            "date": "2025-11-07 11:05:52"
+        },
+        {
+            "id": 6,
             "actiontype": 1,
             "description": "qsdf",
-            "value": 2000,
-            "date": "time.Date(2025, time.November, 6, 17, 30, 29, 130900519, time.Local)"
+            "value": 113,
+            "date": "7000-11-07 11:06:24"
+        },
+        {
+            "id": 7,
+            "actiontype": 1,
+            "description": "qsdfm",
+            "value": 2,
+            "date": "07-11-2025 11:06:51"
+        },
+        {
+            "id": 8,
+            "actiontype": 2,
+            "description": "qsdflmkqmsdklfj qsdfqsdf",
+            "value": 200,
+            "date": "07-11-2025 11:31:44"
         }
     ]
 }
