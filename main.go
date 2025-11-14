@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/gob"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -10,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	colortext "github.com/maminirinaedwino/depenseTrackerJson/ColorText"
+	colortext "github.com/MaminirinaEdwino/depenseTrackerJson/ColorText"
 )
 
 const Filename = "depense.foza"
@@ -36,6 +37,17 @@ func ErrorChecker(err error) {
 	}
 }
 
+func ecrireGob(data Save, fileName string) error {
+	fichier, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer fichier.Close()
+
+	encoder := gob.NewEncoder(fichier)
+	return encoder.Encode(data)
+}
+
 func GenerateSaveFile() {
 	var save Save
 	save.Argent = 0
@@ -48,6 +60,7 @@ func GenerateSaveFile() {
 	file, err := os.Create(homeDir+"/"+Filename)
 	ErrorChecker(err)
 	file.WriteString(string(jsonData))
+	
 }
 
 func (save *Save) WriteFile() {
@@ -180,6 +193,7 @@ func main() {
 	if _, err := os.Stat(homeDir+"/"+Filename); err != nil {
 		GenerateSaveFile()
 	}
+	ecrireGob(save, homeDir+"/"+Filename)
 	addAction := flag.Bool("add", false, "Add a depense or money")
 	deleteaction := flag.Bool("delete", false, "Delete an action")
 	listAllAction := flag.Bool("list", false, "List all action")
